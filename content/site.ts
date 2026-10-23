@@ -1,30 +1,45 @@
 export const site = {
   name: "DanceHubTr",
   tagline:
-    "Yarışma takvimi, bilet, canlı skorboard ve kulüp paneli. Aileler, kulüpler, sporcular ve jüriler için tek adres.",
+    "IS Group'ın dans yarışmaları için tek adres: yarışma takvimi, resmî sonuçlar, jüri detayı ve fotoğraf–video galerisi.",
   cta: {
-    primary: { label: "Bize yazın", href: "mailto:iletisim@dancehubtr.com" },
-    secondary: { label: "Neler yapacağız?", href: "#ozellikler" }
+    primary: { label: "Sonuç yükle", href: "#sonuclar" },
+    secondary: { label: "Yarışmalar", href: "#yarismalar" }
   },
+
+  // Turuncu blok içindeki iki sütun
+  pillars: [
+    {
+      title: "Takvim",
+      body: "Tüm yarışmalar tek listede. Tarih, şehir ve disiplinle filtrele."
+    },
+    {
+      title: "Arşiv",
+      body: "Bütün sezonların sonuçları tek yerde, kalıcı olarak erişilebilir."
+    }
+  ],
+
   features: [
     {
       title: "Yarışma takvimi",
-      body: "Türkiye'deki dans yarışmaları tek takvimde. Şehir, branş ve tarihe göre filtrele."
+      body: "IS Group'ın düzenlediği tüm yarışmalar; tarih, şehir ve disiplin bazında filtrelenebilir liste."
     },
     {
-      title: "Canlı skorboard",
-      body: "Jüri puanları girer, sonuçlar anında güncellenir. Veliler çocuklarını canlı izler."
+      title: "Resmî sonuçlar",
+      body: "Masa hakemi yarışma sonrası sonuçları yükler. Sıra, toplam ve jüri bazında puan detayı yayınlanır."
     },
     {
-      title: "Bilet ve kayıt",
-      body: "QR kodlu biletler, kulüp üzerinden yarışmacı kaydı, veli davet sistemi."
+      title: "Foto & video galeri",
+      body: "Performanslara bağlı görseller ve videolar. Dansçı kimliği gizli kalır, galeri koreografi üzerinden kurulur."
     }
   ],
+
   who: [
-    { role: "Aileler", desc: "Çocuğunuzun sırasını ve puanını canlı takip edin." },
-    { role: "Kulüpler", desc: "Sporcu, veli ve ödeme takibi tek panelde." },
-    { role: "Sporcular", desc: "Yarışma geçmişiniz, madalyalarınız, galeriniz." },
-    { role: "Jüriler", desc: "Tablet'ten puanlama, anında sonuç." }
+    { role: "Seyirci", desc: "Sonuçları, jüri puanlarını ve galeriyi takip et." },
+    { role: "Kulüpler", desc: "Kendi etkinliğini yönet, sonuçlarını yükle." },
+    { role: "Masa Hakemi", desc: "Yarışma bitiminde sonuç dosyasını tek tıkla yükle." },
+    { role: "Jüri", desc: "Puanlar kayıt altında, şeffaf ve doğrulanabilir." }
   ],
+
   contact: "iletisim@dancehubtr.com"
 }

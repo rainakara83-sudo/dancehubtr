@@ -1,4 +1,5 @@
 import { site } from "../content/site"
+import BeklemeFormu from "@/components/BeklemeFormu"
 
 const NAV = [
   { label: "Yarışmalar", href: "#yarismalar" },
@@ -78,16 +79,11 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 grid-lines opacity-70" />
         <div className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-sun/30 blur-3xl" />
-        <div className="pointer-events-none absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-orange/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-orange/15 blur-3xl" />
 
         <div className="shell relative py-20 sm:py-28">
           <div className="grid items-center gap-14 lg:grid-cols-[1.15fr_0.85fr]">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-sun/30 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-navy">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-orange" />
-                Çok yakında
-              </span>
-
               <h1 className="display mt-7 text-[clamp(3rem,10vw,7.5rem)] text-navy">
                 Türkiye&apos;nin
                 <br />
@@ -96,8 +92,10 @@ export default function Home() {
                 tek adreste
               </h1>
 
-              <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted text-pretty">
-                {site.tagline}
+              <p className="display mt-8 text-2xl text-orange sm:text-3xl">{site.hero.lead}</p>
+
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted text-pretty">
+                {site.hero.body}
               </p>
 
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -119,12 +117,13 @@ export default function Home() {
                 <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border-[18px] border-sun/90" />
                 <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
                 <div className="absolute bottom-0 inset-x-0 bg-navy/95 p-6">
-                  <p className="display text-2xl text-white">
-                    sahne
-                    <span className="text-sun">.</span>
+                  <p className="display text-xl leading-[1.05] text-white sm:text-2xl">
+                    yaklaşan
+                    <br />
+                    etkinlikler<span className="text-sun">.</span>
                   </p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
-                    IS Group presents
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
+                    IS GROUP PRESENTS
                   </p>
                 </div>
               </div>
@@ -138,13 +137,18 @@ export default function Home() {
 
         {/* İstatistik şeridi */}
         <div className="relative border-y border-navy/10 bg-navy">
-          <div className="shell grid grid-cols-2 divide-navy/20 lg:grid-cols-4 lg:divide-x">
-            {STATS.map((s) => (
-              <div key={s.label} className="px-4 py-8 text-center">
-                <p className="display text-4xl text-sun sm:text-5xl">{s.value}</p>
-                <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-white/55">{s.label}</p>
-              </div>
-            ))}
+          <div className="shell py-10">
+            <p className="text-center text-xs font-bold uppercase tracking-[0.25em] text-sun">
+              Lansman Sezonu Verileri
+            </p>
+            <div className="mt-8 grid grid-cols-2 divide-navy/20 lg:grid-cols-4 lg:divide-x">
+              {STATS.map((s) => (
+                <div key={s.label} className="px-4 py-4 text-center">
+                  <p className="display text-4xl text-sun sm:text-5xl">{s.value}</p>
+                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-white/55">{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -155,16 +159,14 @@ export default function Home() {
         <div className="shell relative py-20">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/70">
-                IS Group
-              </p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/70">IS Group</p>
               <h2 className="display mt-4 text-[clamp(2.5rem,7vw,5rem)] text-white">
                 Sahne hazır.
                 <br />
                 <span className="text-sun">Sen gelsene.</span>
               </h2>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:w-[26rem]">
+            <div className="grid gap-4 sm:grid-cols-2 lg:w-[30rem]">
               {site.pillars.map((p) => (
                 <div key={p.title} className="rounded-xl2 bg-white p-5 shadow-card">
                   <p className="display text-lg text-navy">{p.title}</p>
@@ -176,14 +178,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------------- ÖZELLİKLER ---------------- */}
+      {/* ---------------- PLATFORM ---------------- */}
       <section id="ozellikler" className="bg-cream py-24">
         <div className="shell">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange">Platform</p>
-            <h2 className="display mt-3 text-[clamp(2.25rem,6vw,4rem)] text-navy">
-              Ne yapacağız
-            </h2>
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange">Platform Rehberi</p>
+            <h2 className="display mt-3 text-[clamp(2.25rem,6vw,4rem)] text-navy">Ne Sunuyoruz</h2>
           </div>
 
           <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -201,7 +201,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------------- SONUÇ TABLOSU ---------------- */}
+      {/* ---------------- SONUÇLAR ---------------- */}
       <section id="sonuclar" className="bg-white py-24">
         <div className="shell">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -220,15 +220,54 @@ export default function Home() {
               </p>
             </div>
             <a href="#yarismalar" className="btn-ghost shrink-0">
-              Tüm sonuçlar
+              Tüm yarışmalar
             </a>
           </div>
 
-          {/* Tablo */}
-          <div className="mt-14 overflow-hidden rounded-xl3 border border-navy/10 bg-white shadow-card">
+          {/* Yarışmalar — üstte */}
+          <div id="yarismalar" className="mt-14 scroll-mt-24">
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-navy/50">
+              Yarışmalar
+            </p>
+            <div className="mt-5 flex gap-4 overflow-x-auto pb-3">
+              {site.competitions.map((c, i) => (
+                <a
+                  key={`${c.name}-${c.eps}-${i}`}
+                  href="#sonuclar"
+                  className={`min-w-[17rem] shrink-0 rounded-xl2 border p-5 shadow-card transition hover:-translate-y-1 ${
+                    c.live
+                      ? "border-orange/40 bg-orange/[0.06]"
+                      : "border-navy/10 bg-white hover:border-navy/25"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      className={`rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.15em] ${
+                        c.live ? "bg-orange text-white" : "bg-navy/10 text-navy/60"
+                      }`}
+                    >
+                      {c.eps}
+                    </span>
+                    {c.live && (
+                      <span className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-orange">
+                        Yayında
+                      </span>
+                    )}
+                  </div>
+                  <p className="display mt-4 text-base leading-tight text-navy">{c.name}</p>
+                  <p className="mt-3 text-xs font-semibold text-navy/55">
+                    {c.date} · {c.city}
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Sonuç tablosu — altta */}
+          <div className="mt-8 overflow-hidden rounded-xl3 border border-navy/10 bg-white shadow-card">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-navy/10 bg-navy px-6 py-5">
               <div>
-                <p className="display text-xl text-white">IS Group Kış Ligi · Final</p>
+                <p className="display text-xl text-white">IS GROUP KIŞ LİGİ · FINAL</p>
                 <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
                   Show Dance · Solo Kadın · Junior
                 </p>
@@ -345,14 +384,11 @@ export default function Home() {
           <div className="max-w-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange">Galeri</p>
             <h2 className="display mt-3 text-[clamp(2.25rem,6vw,4rem)] text-navy">
-              Sahnenin
+              <span className="highlight">Sahnelerden</span>
               <br />
-              <span className="highlight">kareleri</span>
+              kareler
             </h2>
-            <p className="mt-6 text-lg leading-relaxed text-muted text-pretty">
-              Fotoğraf ve video, performansa bağlı olarak yüklenir. Dansçının kimliği gizli
-              kalır; galeri koreografi üzerinden kurulur.
-            </p>
+            <p className="mt-6 text-lg leading-relaxed text-muted text-pretty">{site.gallery.body}</p>
           </div>
 
           <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -373,26 +409,39 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          {/* Arşiv listesi — geriye doğru */}
+          <div id="arsiv" className="mt-16 scroll-mt-24">
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-navy/50">
+              Arşiv
+            </p>
+            <ul className="mt-5 divide-y divide-navy/10 border-y border-navy/10">
+              {site.gallery.archive.map((a, i) => (
+                <li key={a}>
+                  <a
+                    href="#galeri"
+                    className="group flex items-center justify-between gap-4 py-4 transition hover:bg-white/60"
+                  >
+                    <span className="display text-base text-navy sm:text-lg">{a}</span>
+                    <span className="shrink-0 text-xs font-bold uppercase tracking-[0.15em] text-navy/35 transition group-hover:text-orange">
+                      →
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
-      {/* ---------------- CTA ---------------- */}
-      <section className="bg-sun py-20">
+      {/* ---------------- ERKEN ERİŞİM / BEKLEME LİSTESİ ---------------- */}
+      <section id="erken-erisim" className="bg-sun py-20">
         <div className="shell flex flex-col items-center text-center">
           <h2 className="display max-w-3xl text-[clamp(2.25rem,7vw,4.5rem)] text-navy">
-            Açılış haberini
-            <br />
-            kaçırma
+            {site.waitlist.title}
           </h2>
-          <p className="mt-5 max-w-xl text-lg text-navy/70">
-            Erişim açılınca haber vereceğiz. Şimdilik kayıt formu kapalı — bize yaz.
-          </p>
-          <a
-            href={`mailto:${site.contact}?subject=DanceHubTr — erişim açılışı`}
-            className="btn-navy mt-9"
-          >
-            {site.contact}
-          </a>
+          <p className="mt-5 max-w-xl text-lg text-navy/70">{site.waitlist.body}</p>
+          <BeklemeFormu />
         </div>
       </section>
 
@@ -407,7 +456,7 @@ export default function Home() {
               </a>
             ))}
           </div>
-          <p className="text-sm text-white/35">© 2026 IS Group · Türkiye</p>
+          <p className="text-sm text-white/35">{site.footer}</p>
         </div>
       </footer>
     </main>

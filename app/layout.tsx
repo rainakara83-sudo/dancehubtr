@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "IS Group'ın dans yarışmaları için tek adres: yarışma takvimi, resmî sonuçlar, jüri detayı ve fotoğraf–video galerisi.",
   openGraph: {
     title: "DanceHubTr",
-    description: "Türkiye'nin dans sahnesi tek adreste. Çok yakında.",
+    description: "Türkiye'nin dans sahnesi tek adreste. Yarışma takvimi, resmî sonuçlar ve galeri.",
     locale: "tr_TR",
     type: "website"
   }

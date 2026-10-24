@@ -227,6 +227,66 @@ export default function YuklePage() {
               ))}
             </ul>
 
+            {/* KAMUYA AÇIK OLACAK İSİMLER — yayınlamadan önce kontrol et */}
+            {(() => {
+              const rows: any[] = []
+              for (const disc of Object.values(preview.payload?.disciplines ?? {}) as any) {
+                for (const node of Object.values(disc ?? {}) as any[]) {
+                  for (const p of node?.performances ?? []) {
+                    rows.push({ name: p.name, club: p.club, marks: p.marks, place: p.place })
+                  }
+                }
+              }
+              if (!rows.length) return null
+              return (
+                <div className="mt-8 rounded-xl2 border-2 border-orange/40 bg-orange/[0.05] p-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange">
+                    Kamuya açık olacak isimler
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-navy/70">
+                    Aşağıdaki isimler site üzerinde <strong>koreografi adı</strong> olarak görünecek.
+                    Gerçek dansçı adı saklanır, ancak burada bir isim yanlışlıkla yazıldıysa{" "}
+                    <strong>fark et</strong> — yayınlamadan önce düzelt.
+                  </p>
+                  <div className="mt-4 max-h-64 overflow-y-auto rounded-xl2 bg-white">
+                    <table className="w-full text-left text-sm">
+                      <thead className="sticky top-0 bg-cream">
+                        <tr>
+                          <th className="px-4 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
+                            Görünecek ad
+                          </th>
+                          <th className="px-4 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
+                            Kulüp
+                          </th>
+                          <th className="px-4 py-2.5 text-right text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
+                            Puanlar
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.slice(0, 60).map((r, i) => (
+                          <tr key={i} className="border-t border-navy/5">
+                            <td className="px-4 py-2 font-semibold text-navy">
+                              {r.name || <span className="text-orange">Guest</span>}
+                            </td>
+                            <td className="px-4 py-2 text-navy/55">{r.club || "—"}</td>
+                            <td className="px-4 py-2 text-right font-mono text-xs text-navy/55">
+                              {r.marks || "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {rows.length > 60 && (
+                    <p className="mt-2 text-xs text-navy/50">
+                      … ve {rows.length - 60} performans daha
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
+
             {published ? (
               <div className="mt-6 rounded-xl2 border border-navy/15 bg-navy px-5 py-4 text-center">
                 <p className="display text-lg text-sun">Yayınlandı</p>

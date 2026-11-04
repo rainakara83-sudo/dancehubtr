@@ -65,11 +65,15 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <a href={site.cta.secondary.href} className="btn-ghost hidden !px-5 !py-2.5 text-sm sm:inline-flex">
-              {site.cta.secondary.label}
+            <a
+              href={site.cta.competitions.href}
+              className="btn-ghost hidden !px-5 !py-2.5 text-sm sm:inline-flex"
+            >
+              {site.cta.competitions.label}
             </a>
-            <a href={site.cta.primary.href} className="btn-primary !px-5 !py-2.5 text-sm">
-              {site.cta.primary.label}
+            {/* SS1: header'daki buton "Sonuç yükle" değil, "Üye girişi" */}
+            <a href={site.cta.login.href} className="btn-primary !px-5 !py-2.5 text-sm">
+              {site.cta.login.label}
             </a>
           </div>
         </div>
@@ -98,13 +102,14 @@ export default function Home() {
                 {site.hero.body}
               </p>
 
+              {/* SS2: butonlar yer değiştirdi — üstte Yarışmalar, altta Sonuç yükle */}
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <a href={site.cta.primary.href} className="btn-primary">
-                  {site.cta.primary.label}
+                <a href={site.cta.competitions.href} className="btn-primary">
+                  {site.cta.competitions.label}
                   <span aria-hidden="true">→</span>
                 </a>
-                <a href={site.cta.secondary.href} className="btn-navy">
-                  {site.cta.secondary.label}
+                <a href={site.cta.upload.href} className="btn-navy">
+                  {site.cta.upload.label}
                 </a>
               </div>
             </div>
@@ -117,13 +122,11 @@ export default function Home() {
                 <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border-[18px] border-sun/90" />
                 <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
                 <div className="absolute bottom-0 inset-x-0 bg-navy/95 p-6">
+                  {/* SS3: "IS GROUP PRESENTS" kaldırıldı */}
                   <p className="display text-xl leading-[1.05] text-white sm:text-2xl">
                     yaklaşan
                     <br />
                     etkinlikler<span className="text-sun">.</span>
-                  </p>
-                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
-                    IS GROUP PRESENTS
                   </p>
                 </div>
               </div>
@@ -159,7 +162,7 @@ export default function Home() {
         <div className="shell relative py-20">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/70">IS Group</p>
+              {/* SS4: "IS Group" üst başlığı kaldırıldı */}
               <h2 className="display mt-4 text-[clamp(2.5rem,7vw,5rem)] text-white">
                 Sahne hazır.
                 <br />
@@ -391,45 +394,26 @@ export default function Home() {
             <p className="mt-6 text-lg leading-relaxed text-muted text-pretty">{site.gallery.body}</p>
           </div>
 
+          {/* SS7: kutucuklar organizasyon adlarını gösterir, en yeni en üstte */}
           <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              { h: "h-56", bg: "bg-navy", label: "Final" },
-              { h: "h-40", bg: "bg-orange", label: "Show" },
-              { h: "h-48", bg: "bg-sun", label: "Rehber" },
-              { h: "h-64", bg: "bg-navy-deep", label: "Gece" }
+              { h: "h-56", bg: "bg-navy", fg: "text-white/90" },
+              { h: "h-40", bg: "bg-orange", fg: "text-white/95" },
+              { h: "h-48", bg: "bg-sun", fg: "text-navy" },
+              { h: "h-64", bg: "bg-navy-deep", fg: "text-white/90" }
             ].map((c, i) => (
               <div
-                key={i}
+                key={site.gallery.events[i]}
                 className={`group relative overflow-hidden rounded-xl2 ${c.h} ${c.bg} shadow-card`}
               >
                 <div className="absolute inset-0 stripe-orange opacity-0 transition group-hover:opacity-100" />
-                <div className="absolute inset-0 grid place-items-center">
-                  <span className="display text-2xl text-white/90">{c.label}</span>
+                <div className="absolute inset-0 grid place-items-center p-4">
+                  <span className={`display text-center text-xl leading-tight sm:text-2xl ${c.fg}`}>
+                    {site.gallery.events[i]}
+                  </span>
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Arşiv listesi — geriye doğru */}
-          <div id="arsiv" className="mt-16 scroll-mt-24">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-navy/50">
-              Arşiv
-            </p>
-            <ul className="mt-5 divide-y divide-navy/10 border-y border-navy/10">
-              {site.gallery.archive.map((a, i) => (
-                <li key={a}>
-                  <a
-                    href="#galeri"
-                    className="group flex items-center justify-between gap-4 py-4 transition hover:bg-white/60"
-                  >
-                    <span className="display text-base text-navy sm:text-lg">{a}</span>
-                    <span className="shrink-0 text-xs font-bold uppercase tracking-[0.15em] text-navy/35 transition group-hover:text-orange">
-                      →
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>

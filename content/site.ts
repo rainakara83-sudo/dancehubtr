@@ -7,8 +7,11 @@ export const site = {
   },
 
   cta: {
-    primary: { label: "Sonuç yükle", href: "/giris" },
-    secondary: { label: "Yarışmalar", href: "#yarismalar" }
+    // SS2: hero'da "Yarışmalar" üstte, "Sonuç yükle" altta
+    competitions: { label: "Yarışmalar", href: "#yarismalar" },
+    upload: { label: "Sonuç yükle", href: "/yukle" },
+    // SS1: header'daki buton artık üye girişi
+    login: { label: "Üye girişi", href: "/giris" }
   },
 
   // Turuncu blok içindeki iki kart
@@ -26,11 +29,13 @@ export const site = {
   features: [
     {
       title: "Yarışma Takvimi",
-      body: "IS Group'ın düzenlediği tüm yarışmalar; tarih, şehir ve disiplin bazında filtrelenebilir liste."
+      // SS5
+      body: "Ulusal ve uluslararası yarışmalar; tarih, şehir ve disiplin bazında filtrelenebilir liste."
     },
     {
       title: "Resmî Sonuçlar",
-      body: "Masa hakemi yarışma sonrası sonuçları yükler. Sıra, toplam ve jüri bazında puan detayı yayınlanır."
+      // SS6
+      body: "Masa Hakemi: Karmaşık hesaplara son; yarışma bittiği an sonuçları saniyeler içinde yüklenir."
     },
     {
       title: "Foto & Video Galeri",
@@ -53,20 +58,12 @@ export const site = {
     { name: "LOZENGE DANCE COMPETITION", eps: "EPS 3", date: "18 Eylül 2025", city: "İstanbul", live: false }
   ],
 
-  // Galeri bölümü (SS9)
+  // Galeri bölümü (SS9) — SS7: kutucuklar organizasyonları gösterir
   gallery: {
     title: "Sahnelerden kareler",
     body: "Fotoğraf ve video, performansa bağlı olarak yüklenir. Dansçının kimliği gizli kalır; galeri koreografi üzerinden kurulur.",
-    archive: [
-      "METAMORFOZ DANCE COMPETITION  EPS 5",
-      "LOZENGE DANCE COMPETITION EPS 4",
-      "METAMORFOZ DANCE COMPETITION  EPS 4",
-      "LOZENGE DANCE COMPETITION EPS 3",
-      "METAMORFOZ DANCE COMPETITION  EPS 3",
-      "LOZENGE DANCE COMPETITION EPS 2",
-      "METAMORFOZ DANCE COMPETITION  EPS 2",
-      "LOZENGE DANCE COMPETITION EPS 1"
-    ]
+    // En yeni organizasyon en üstte — yeni organizasyon eklerken en başa koy
+    events: ["Metamorfoz 2026", "Lozenge 2026", "Metamorfoz 2025", "Lozenge 2025"]
   },
 
   // Erken erişim / bekleme listesi (CTA)

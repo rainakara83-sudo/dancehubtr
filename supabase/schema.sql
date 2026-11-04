@@ -687,6 +687,7 @@ grant all on all sequences in schema public to service_role;
 
 -- Panel üyeleri performansları gerçek isimleriyle görebilsin
 grant select on public.performances to authenticated;
+drop policy if exists "performances: staff gercek isim gorur" on public.performances;
 create policy "performances: staff gercek isim gorur" on public.performances
   for select using (public.is_staff());
 

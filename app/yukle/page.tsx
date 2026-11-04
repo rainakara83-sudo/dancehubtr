@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation"
 import { getSupabaseBrowser, isSupabaseConfigured } from "@/lib/supabase"
 
 type Session = { access_token: string; email?: string }
+type EventRow = { id: string; title: string; city: string | null; start_date: string }
 
 export default function YuklePage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [session, setSession] = useState<Session | null>(null)
+  const [events, setEvents] = useState<EventRow[]>([])
+  const [eventId, setEventId] = useState("")
   const [checking, setChecking] = useState(true)
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -43,6 +46,24 @@ export default function YuklePage() {
       setChecking(false)
     })
   }, [router])
+
+  // Yayınlanmış etkinlikler (yayınlama hedefi)
+  useEffect(() => {
+    if (!session) return
+    const supabase = getSupabaseBrowser()
+    if (!supabase) return
+    supabase
+      .from("events")
+      .select("id, title, city, start_date")
+      .eq("status", "published")
+      .order("start_date", { ascending: false })
+      .then(({ data }) => {
+        if (!data) return
+        const rows = data as EventRow[]
+        setEvents(rows)
+        if (rows.length === 1) setEventId(rows[0].id)
+      })
+  }, [session])
 
   const onPick = useCallback((f: File | undefined | null) => {
     setError("")
@@ -295,24 +316,35 @@ export default function YuklePage() {
                 </p>
               </div>
             ) : (
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <input
-                  type="text"
-                  placeholder="Etkinlik UUID (Supabase > events)"
-                  className="flex-1 rounded-xl2 border-2 border-navy/15 bg-paper px-4 py-3 font-mono text-sm text-navy outline-none transition focus:border-orange"
-                />
-                <button
-                  onClick={(e) => {
-                    const input = (e.currentTarget.previousElementSibling as HTMLInputElement) || null
-                    const id = input?.value.trim()
-                    if (id) handlePublish(id)
-                  }}
-                  disabled={busy}
-                  className="btn-navy shrink-0 disabled:opacity-60"
-                >
-                  {busy ? "Yayınlanıyor…" : "Yayınla"}
-                </button>
-              </div>
+              <>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <select
+                    value={eventId}
+                    onChange={(e) => setEventId(e.target.value)}
+                    className="flex-1 rounded-xl2 border-2 border-navy/15 bg-paper px-4 py-3 text-sm font-semibold text-navy outline-none transition focus:border-orange"
+                  >
+                    <option value="">Etkinlik seç…</option>
+                    {events.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.title}
+                        {ev.city ? ` — ${ev.city}` : ""} ({ev.start_date})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => handlePublish(eventId)}
+                    disabled={busy || !eventId}
+                    className="btn-navy shrink-0 disabled:opacity-60"
+                  >
+                    {busy ? "Yayınlanıyor…" : "Yayınla"}
+                  </button>
+                </div>
+                {events.length === 0 && (
+                  <p className="mt-2 text-xs text-navy/50">
+                    Yayınlanmış etkinlik bulunamadı. Supabase → events tablosuna etkinlik ekle.
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}

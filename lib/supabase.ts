@@ -40,6 +40,18 @@ export function getSupabaseServer(token?: string | null): SupabaseClient | null 
   return null
 }
 
+/**
+ * Herkese açık (anon) istemci — yalnızca okuma.
+ * public_* view'ları RLS'i atlar, gerçek isimleri (real_name) hiçbir koşulda
+ * dışarı vermez; bu yüzden sonuç sayfası güvenle bunu kullanabilir.
+ */
+export function getSupabasePublic(): SupabaseClient | null {
+  if (!isSupabaseConfigured) return null
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  })
+}
+
 /** Bearer token'ı doğrular, geçerliyse kullanıcı nesnesini döndürür. */
 export async function verifyToken(token?: string | null) {
   if (!token || !isSupabaseConfigured) return null

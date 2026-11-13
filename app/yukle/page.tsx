@@ -7,6 +7,30 @@ import { getSupabaseBrowser, isSupabaseConfigured } from "@/lib/supabase"
 type Session = { access_token: string; email?: string }
 type EventRow = { id: string; title: string; city: string | null; start_date: string }
 
+/** Dosyanın ait olduğu yarışmanın bilgisi (METAM4 başlığından). */
+function fileEventMeta(payload: any) {
+  const discs = (payload?.disciplines ?? {}) as Record<string, any>
+  for (const d of Object.values(discs) as any[]) {
+    for (const n of Object.values((d ?? {}) as Record<string, any>) as any[]) {
+      if (n?.meta?.event_name) return n.meta as any
+    }
+  }
+  return null
+}
+
+/** "İSTANBUL" / "Istanbul" / "İstanbul" -> aynı karşılaştırma için normalize. */
+function normCity(s: string | null | undefined) {
+  return String(s ?? "")
+    .toLocaleLowerCase("tr-TR")
+    .replace(/ı/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ö/g, "o")
+    .replace(/ş/g, "s")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9]/g, "")
+}
+
 export default function YuklePage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -248,6 +272,23 @@ export default function YuklePage() {
               ))}
             </ul>
 
+            {/* Dosyanın ait olduğu yarışma */}
+            {(() => {
+              const meta = fileEventMeta(preview.payload)
+              if (!meta) return null
+              return (
+                <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl2 bg-cream px-4 py-3 text-sm">
+                  <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-navy/50">
+                    Dosyadaki yarışma
+                  </span>
+                  <span className="font-semibold text-navy">{meta.event_name}</span>
+                  <span className="text-navy/55">
+                    {meta.event_date} · {meta.event_place}
+                  </span>
+                </div>
+              )
+            })()}
+
             {/* KAMUYA AÇIK OLACAK İSİMLER — yayınlamadan önce kontrol et */}
             {(() => {
               const rows: any[] = []
@@ -365,6 +406,30 @@ export default function YuklePage() {
                     Yayınlanmış etkinlik bulunamadı. Supabase → events tablosuna etkinlik ekle.
                   </p>
                 )}
+
+                {/* Yanlış etkinliğe yayınlamayı engelleyen uyarı */}
+                {(() => {
+                  const sel = events.find((ev) => ev.id === eventId)
+                  if (!sel) return null
+                  const meta = fileEventMeta(preview?.payload)
+                  if (!meta?.event_name) return null
+
+                  const cityOk = normCity(sel.city) === normCity(meta.event_place)
+                  const fileYear = (String(meta.event_date ?? "").match(/\d{4}/) || [])[0]
+                  const eventYear = String(sel.start_date ?? "").slice(0, 4)
+                  const yearOk = !fileYear || fileYear === eventYear
+                  if (cityOk && yearOk) return null
+
+                  return (
+                    <div className="mt-4 rounded-xl2 border-2 border-orange bg-orange/[0.07] px-4 py-3 text-sm leading-relaxed text-navy">
+                      <strong className="text-orange-dark">⚠️ Dikkat:</strong> Bu dosya{" "}
+                      <strong>{meta.event_name}</strong> yarışmasına ait (
+                      {meta.event_date} · {meta.event_place}). Seçtiğin etkinlik ise{" "}
+                      <strong>{sel.title}</strong> ({sel.start_date} · {sel.city}).
+                      Yanlış etkinliğe yayınlarsan sonuçlar yanlış yarışmada görünür.
+                    </div>
+                  )
+                })()}
               </>
             )}
           </div>

@@ -218,6 +218,8 @@ begin
   update public.events
      set source = 'metam4',
          source_ref = p_payload#>>'{stats,source_ref}',
+         results_published = true,
+         published_at = coalesce(published_at, now()),
          city = coalesce(city, (select j.val->>'place' from jsonb_path_query(
              p_payload, '$.disciplines.**.meta.place') as j(val) limit 1))
    where id = p_event_id;

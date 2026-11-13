@@ -8,7 +8,7 @@ export const site = {
 
   cta: {
     // SS2: hero'da "Yarışmalar" üstte, "Sonuç yükle" altta
-    competitions: { label: "Yarışmalar", href: "#yarismalar" },
+    competitions: { label: "Yarışmalar", href: "/#yarismalar" },
     upload: { label: "Sonuç yükle", href: "/yukle" },
     // SS1: header'daki buton artık üye girişi
     login: { label: "Üye girişi", href: "/giris" }

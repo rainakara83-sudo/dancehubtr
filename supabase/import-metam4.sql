@@ -39,6 +39,8 @@ declare
   v_mark       numeric;
   v_bib        int;
   v_name       text;
+  v_real_name  text;
+  v_guest_payload int;
   v_club_name  text;
   v_round      text;
   v_marks      text;
@@ -127,6 +129,11 @@ begin
       loop
         v_bib       := (v_perf_json->>'bib_number')::int;
         v_name      := nullif(trim(v_perf_json->>'name'), '');
+        v_real_name := nullif(trim(v_perf_json->>'real_name'), '');
+        v_guest_payload := case
+          when nullif(trim(v_perf_json->>'guest_number'), '') is null then null
+          else (v_perf_json->>'guest_number')::int
+        end;
         v_club_name := nullif(trim(v_perf_json->>'club'), '');
         v_round     := coalesce(nullif(v_perf_json->>'round',''), 'Final');
         v_marks     := nullif(v_perf_json->>'marks', '');
@@ -145,17 +152,22 @@ begin
         end if;
 
         -- Koreografi adı yoksa Guest N
+        -- Numara parser'da sabitlendi; preview ile yayınlanan sonuç aynı olsun.
         if v_name is null then
-          v_guest_no := v_guest_no + 1;
+          if v_guest_payload is not null then
+            v_guest_no := v_guest_payload;
+          else
+            v_guest_no := v_guest_no + 1;
+          end if;
         end if;
 
         insert into public.performances (
           event_category_id, club_id, bib_number,
-          choreography_title, guest_number, is_guest
+          real_name, choreography_title, guest_number, is_guest
         )
         values (
           v_category, v_club, v_bib,
-          v_name, case when v_name is null then v_guest_no else null end,
+          v_real_name, v_name, case when v_name is null then v_guest_no else null end,
           (v_name is null)
         )
         returning id into v_perf;

@@ -254,27 +254,44 @@ export default function YuklePage() {
               for (const disc of Object.values(preview.payload?.disciplines ?? {}) as any) {
                 for (const node of Object.values(disc ?? {}) as any[]) {
                   for (const p of node?.performances ?? []) {
-                    rows.push({ name: p.name, club: p.club, marks: p.marks, place: p.place })
+                    rows.push({
+                      name: p.name,
+                      realName: p.real_name,
+                      guestNumber: p.guest_number,
+                      club: p.club,
+                      marks: p.marks,
+                      place: p.place,
+                      category: node?.category_title || node?.category_name || node?.ref || "",
+                    })
                   }
                 }
               }
               if (!rows.length) return null
+              const titled = rows.filter((r) => r.name).length
               return (
                 <div className="mt-8 rounded-xl2 border-2 border-orange/40 bg-orange/[0.05] p-5">
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange">
                     Kamuya açık olacak isimler
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-navy/70">
-                    Aşağıdaki isimler site üzerinde <strong>koreografi adı</strong> olarak görünecek.
-                    Gerçek dansçı adı saklanır, ancak burada bir isim yanlışlıkla yazıldıysa{" "}
-                    <strong>fark et</strong> — yayınlamadan önce düzelt.
+                    Sitede <strong>koreografi adı</strong> varsa o, yoksa{" "}
+                    <strong>Guest N</strong> görünecek. Gerçek dansçı adları{" "}
+                    <strong>hiçbir zaman</strong> herkese açık sayfada yayınlanmaz; yalnızca
+                    panelde görünür. {titled} kayıtta koreografi adı bulundu,{" "}
+                    {rows.length - titled} kayıt <strong>Guest N</strong> olarak yayınlanacak.
                   </p>
                   <div className="mt-4 max-h-64 overflow-y-auto rounded-xl2 bg-white">
                     <table className="w-full text-left text-sm">
                       <thead className="sticky top-0 bg-cream">
                         <tr>
                           <th className="px-4 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
-                            Görünecek ad
+                            Kategori
+                          </th>
+                          <th className="px-4 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
+                            Sitede görünecek
+                          </th>
+                          <th className="px-4 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
+                            Panel (gizli)
                           </th>
                           <th className="px-4 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-navy/55">
                             Kulüp
@@ -287,9 +304,13 @@ export default function YuklePage() {
                       <tbody>
                         {rows.slice(0, 60).map((r, i) => (
                           <tr key={i} className="border-t border-navy/5">
+                            <td className="px-4 py-2 text-navy/45">{r.category}</td>
                             <td className="px-4 py-2 font-semibold text-navy">
-                              {r.name || <span className="text-orange">Guest</span>}
+                              {r.name || (
+                                <span className="text-orange">Guest {r.guestNumber}</span>
+                              )}
                             </td>
+                            <td className="px-4 py-2 text-navy/45">{r.realName || "—"}</td>
                             <td className="px-4 py-2 text-navy/55">{r.club || "—"}</td>
                             <td className="px-4 py-2 text-right font-mono text-xs text-navy/55">
                               {r.marks || "—"}

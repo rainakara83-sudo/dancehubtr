@@ -165,7 +165,55 @@ export default async function SonuclarPage({
                   )}
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* MOBİL: kart listesi (yatay kaydırma yok) */}
+                <ul className="divide-y divide-navy/5 md:hidden">
+                  {catResults.map((r) => {
+                    const s = scoresByResult.get(r.id) ?? []
+                    const byLabel = [...s].sort((a, b) =>
+                      a.label.localeCompare(b.label)
+                    )
+                    return (
+                      <li key={r.id} className="px-5 py-4">
+                        <div className="flex items-start gap-3">
+                          <span className="display shrink-0 rounded-lg bg-orange px-2.5 py-1 text-base text-white">
+                            {r.place_label ?? r.place ?? "—"}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span className="font-semibold break-words text-navy">
+                                {r.display_name}
+                              </span>
+                              {r.choreography_title && (
+                                <span className="shrink-0 rounded-full bg-orange/10 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-orange">
+                                  koreografi
+                                </span>
+                              )}
+                              {r.round && r.round !== "Final" && (
+                                <span className="text-xs text-navy/45">{r.round}</span>
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs break-words text-navy/60">
+                              {r.club_name ?? "—"}
+                            </p>
+                            <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
+                              <p className="font-mono text-[0.7rem] text-navy/70">
+                                {byLabel.length
+                                  ? byLabel.map((j) => `${j.label} ${j.mark}`).join("  ·  ")
+                                  : "—"}
+                              </p>
+                              <p className="display shrink-0 text-lg text-navy">
+                                Toplam {r.sum ?? "—"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+
+                {/* MASAÜSTÜ: tablo */}
+                <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[38rem] text-left text-sm">
                     <thead>
                       <tr className="border-b border-navy/10 text-[0.65rem] uppercase tracking-[0.15em] text-navy/50">

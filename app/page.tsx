@@ -256,7 +256,61 @@ export default async function Home() {
                 </Link>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* MOBİL: kart listesi */}
+              <ul className="divide-y divide-navy/5 md:hidden">
+                {latest.rows.map((r) => (
+                  <li key={r.id} className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span
+                        className={`display grid h-10 w-10 shrink-0 place-items-center rounded-lg text-lg ${
+                          r.place === 1
+                            ? "bg-sun text-navy"
+                            : r.place === 2
+                              ? "bg-navy/10 text-navy"
+                              : "bg-orange/20 text-orange-dark"
+                        }`}
+                      >
+                        {r.place ?? "—"}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="display text-lg break-words text-navy">
+                          {r.display_name}
+                        </p>
+                        {r.choreography_title && (
+                          <p className="mt-0.5 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-orange">
+                            Koreografi adı
+                          </p>
+                        )}
+                        <p className="mt-1 text-xs font-semibold break-words text-navy/60">
+                          {r.club_name ?? "—"}
+                        </p>
+                        <div className="mt-2 flex items-end justify-between gap-3">
+                          <div className="flex flex-wrap gap-1.5">
+                            {latest.labels.map((label) => {
+                              const m = latest.marks.get(r.id)?.get(label)
+                              return (
+                                <span
+                                  key={label}
+                                  className="inline-flex items-center gap-1 rounded-md bg-navy/5 px-2 py-1 text-[0.7rem] font-bold text-navy/70"
+                                >
+                                  <span className="text-navy/40">{label}</span>
+                                  {m ?? "—"}
+                                </span>
+                              )
+                            })}
+                          </div>
+                          <span className="display shrink-0 text-xl text-navy">
+                            {r.sum ?? "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* MASAÜSTÜ: tablo */}
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[42rem] border-collapse text-left">
                   <thead>
                     <tr className="border-b border-navy/10 bg-cream">

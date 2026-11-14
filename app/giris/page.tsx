@@ -26,7 +26,10 @@ export default function GirisPage() {
         setNotReady(true)
         return
       }
-      const { error: err } = await supabase.auth.signInWithPassword({ email, password })
+      const { data: sess, error: err } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
       if (err) {
         setError(
           err.message === "Invalid login credentials"
@@ -34,6 +37,21 @@ export default function GirisPage() {
             : err.message
         )
         return
+      }
+      // Yetkili (staff/admin) kullanıcılar doğrudan panele gider
+      const uid = sess.user?.id
+      if (uid) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", uid)
+          .maybeSingle()
+        const role = (prof as { role?: string } | null)?.role
+        if (role === "staff" || role === "admin") {
+          router.push("/panel")
+          router.refresh()
+          return
+        }
       }
       router.push("/yukle")
       router.refresh()

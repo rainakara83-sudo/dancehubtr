@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { site } from "../content/site"
 import BeklemeFormu from "@/components/BeklemeFormu"
-import { SiteHeader, Logo, NAV } from "@/components/SiteHeader"
+import { SiteHeader, Logo } from "@/components/SiteHeader"
+import { NAV } from "@/content/nav"
 import { getEventResults, sortByPlace } from "@/lib/results"
 
 // Ana sayfa en fazla 5 dakikada bir yenilenir (sonuçlar değişebilir)

@@ -496,6 +496,36 @@ drop policy if exists "profiles: staff her seyi yonetir" on public.profiles;
 create policy "profiles: staff her seyi yonetir" on public.profiles
   for all using (public.is_staff()) with check (public.is_staff());
 
+-- ---- Rol yükseltme koruması ----------------------------------------------
+-- "profiles: kendi profilini guncelle" politikası id = auth.uid() olan herkesin
+-- kendi satırını güncellemesine izin verir. Bu, rol kolonu da dahil olduğu için
+-- TEHLİKELİDİR: herhangi bir kullanıcı kendini staff/admin yapabilirdi.
+-- Bu trigger, rol değişikliğini yalnızca staff/admin için izinli kılar.
+create or replace function public.profiles_role_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- Sadece staff/admin, service_role veya DB yoneticisi (SQL Editor) rol degistirebilir.
+  -- session_user: PostgREST isteklerinde 'authenticated'/'anon', SQL Editor'da 'postgres'.
+  if new.role is distinct from old.role
+     and not public.is_staff()
+     and coalesce(session_user, '') not in ('postgres', 'supabase_admin', 'service_role')
+     and coalesce(auth.role(), '') <> 'service_role'
+  then
+    raise exception 'Rol degistirilemez: yetki gerekiyor.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_role_guard_trg on public.profiles;
+create trigger profiles_role_guard_trg
+before update on public.profiles
+for each row execute function public.profiles_role_guard();
+
 -- ---- clubs: herkese açık okunur, yalnız yetkili yazar ----
 drop policy if exists "clubs: herkes okur" on public.clubs;
 create policy "clubs: herkes okur" on public.clubs

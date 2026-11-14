@@ -1,11 +1,9 @@
-import { site } from "@/content/site"
+"use client"
 
-export const NAV = [
-  { label: "Yarışmalar", href: "/#yarismalar" },
-  { label: "Sonuçlar", href: "/sonuclar" },
-  { label: "Galeri", href: "/#galeri" },
-  { label: "Hakkımızda", href: "/#hakkimizda" }
-]
+import { useEffect, useState } from "react"
+import { site } from "@/content/site"
+import { NAV } from "@/content/nav"
+import { getSupabaseBrowser, isSupabaseConfigured } from "@/lib/supabase"
 
 export function Logo() {
   return (
@@ -27,8 +25,21 @@ export function Logo() {
   )
 }
 
-/** Tüm sayfalarda ortak üst menü. */
+/** Tüm sayfalarda ortak üst menü. Giriş yapılmışsa "Panel" butonu gösterir. */
 export function SiteHeader() {
+  const [logged, setLogged] = useState(false)
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    const sb = getSupabaseBrowser()
+    if (!sb) return
+    sb.auth.getSession().then(({ data }) => setLogged(!!data.session))
+    const { data: sub } = sb.auth.onAuthStateChange((_e, session) => {
+      setLogged(!!session)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
   return (
     <header className="sticky top-0 z-50 border-b border-navy/10 bg-white/90 backdrop-blur-md">
       <div className="shell flex h-16 items-center justify-between gap-6">
@@ -56,9 +67,15 @@ export function SiteHeader() {
             {site.cta.competitions.label}
           </a>
           {/* SS1: header'daki buton "Sonuç yükle" değil, "Üye girişi" */}
-          <a href={site.cta.login.href} className="btn-primary !px-5 !py-2.5 text-sm">
-            {site.cta.login.label}
-          </a>
+          {logged ? (
+            <a href="/panel" className="btn-primary !px-5 !py-2.5 text-sm">
+              Panel
+            </a>
+          ) : (
+            <a href={site.cta.login.href} className="btn-primary !px-5 !py-2.5 text-sm">
+              {site.cta.login.label}
+            </a>
+          )}
         </div>
       </div>
     </header>

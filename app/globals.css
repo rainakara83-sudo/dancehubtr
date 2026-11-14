@@ -84,6 +84,17 @@ body {
   .notch-top {
     clip-path: polygon(0 3rem, 100% 0, 100% 100%, 0 100%);
   }
+  /* Veri tablosu kartları için güvenli köşe kesimi:
+     sağ üst köşeden 1.5rem keser, içeriği (tablo satırlarını) ASLA kesmez. */
+  .notch-tr {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 1.5rem) 0,
+      100% 1.5rem,
+      100% 100%,
+      0 100%
+    );
+  }
 }
 
 @layer utilities {

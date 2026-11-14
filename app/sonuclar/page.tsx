@@ -146,7 +146,7 @@ export default async function SonuclarPage({
             const judges = judgesOf(cat.id)
 
             return (
-              <div key={cat.id} className="notch overflow-hidden rounded-xl2 border border-navy/10 bg-white shadow-card">
+              <div key={cat.id} className="notch-tr overflow-hidden rounded-xl2 border border-navy/10 bg-white shadow-card">
                 <div className="border-b border-navy/10 bg-cream px-6 py-5">
                   <h3 className="display text-xl text-navy">
                     {cat.title || cat.name}

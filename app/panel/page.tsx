@@ -36,6 +36,7 @@ export default function PanelPage() {
   const [email, setEmail] = useState("")
 
   const [events, setEvents] = useState<PanelEvent[]>([])
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({})
   const [eventId, setEventId] = useState<string>("")
   const [categories, setCategories] = useState<PanelCategory[]>([])
   const [catId, setCatId] = useState<string>("")
@@ -97,12 +98,43 @@ export default function PanelPage() {
         .select("id,title,slug,city,start_date,status")
         .order("start_date", { ascending: false })
       const { data: cl } = await sb.from("clubs").select("id,name").order("name")
+
+      // Etkinlik basina performans sayisi: verisi olan etkinligi one cikar,
+      // dropdown'da goster (bos yeni etkinlik otomatik secilmesin).
+      const { data: allCats } = await sb
+        .from("event_categories")
+        .select("id,event_id")
+      const { data: allPerf } = await sb
+        .from("performances")
+        .select("id,event_category_id")
+      const catEvent = new Map<string, string>(
+        ((allCats as { id: string; event_id: string }[]) ?? []).map((c) => [
+          c.id,
+          c.event_id
+        ])
+      )
+      const counts: Record<string, number> = {}
+      for (const p of (allPerf as { id: string; event_category_id: string }[]) ??
+        []) {
+        const eid = catEvent.get(p.event_category_id)
+        if (eid) counts[eid] = (counts[eid] ?? 0) + 1
+      }
+
+      const list = ((evs as PanelEvent[]) ?? []).slice().sort((a, b) => {
+        const d = (counts[b.id] ?? 0) - (counts[a.id] ?? 0)
+        if (d !== 0) return d
+        return (
+          new Date(b.start_date ?? 0).getTime() -
+          new Date(a.start_date ?? 0).getTime()
+        )
+      })
+
       if (!alive) return
-      setEvents((evs as PanelEvent[]) ?? [])
+      setEvents(list)
+      setEventCounts(counts)
       setClubs((cl as PanelClub[]) ?? [])
       setPhase("ready")
-      const first = (evs as PanelEvent[] | null)?.[0]
-      if (first) setEventId(first.id)
+      if (list[0]) setEventId(list[0].id)
     }
     boot()
     return () => {
@@ -339,6 +371,7 @@ export default function PanelPage() {
             {events.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.title} · {formatDate(e.start_date)} · {e.city ?? "—"} ·{" "}
+                {eventCounts[e.id] ?? 0} performans ·{" "}
                 {e.status === "published" ? "YAYINDA" : "TASLAK"}
               </option>
             ))}

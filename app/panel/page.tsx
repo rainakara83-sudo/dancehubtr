@@ -540,7 +540,11 @@ export default function PanelPage() {
                             {result?.sum ?? "—"}
                           </td>
                           <td className="px-4 py-3">
-                            {check.consistent ? (
+                            {!check.hasMarks ? (
+                              <span className="rounded-full bg-navy/5 px-2 py-1 text-[11px] font-bold text-navy/50">
+                                · puan yok
+                              </span>
+                            ) : check.consistent ? (
                               <span className="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
                                 ✓ tutarlı
                               </span>
@@ -842,9 +846,11 @@ function EditDrawer({
                   : "bg-amber-100 text-amber-800"
               }`}
             >
-              {check.consistent
-                ? `✓ Puanlar tutarlı (Σ ${check.sumFromMarks} = toplam ${check.storedSum})`
-                : `! ${check.issue}`}
+              {!check.hasMarks
+                ? "· Bu performans için jüri puanı yok (son gecen finale ulaşmamış)."
+                : check.consistent
+                  ? `✓ Puanlar tutarlı (Σ ${check.sumFromMarks} = toplam ${check.storedSum})`
+                  : `! ${check.issue}`}
             </p>
           </section>
         </div>

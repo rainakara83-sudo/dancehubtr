@@ -99,12 +99,15 @@ export function checkMarks(
     }
   }
   if (!hasMarks) {
+    // Juri puani olmayan performanslar (son gecen finale ulasmamis olanlar)
+    // TUTARSIZLIK DEGILDIR - sadece puan verilmemis. Panel bunlari
+    // "puan yok" olarak gosterir, uyari olarak saymaz.
     return {
       sumFromMarks,
       storedSum,
       hasMarks,
-      consistent: false,
-      issue: 'Jüri puanı yok'
+      consistent: true,
+      issue: null
     }
   }
   if (storedSum === null) {

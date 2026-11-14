@@ -135,6 +135,16 @@ export async function getEventResults(slug?: string | null): Promise<EventResult
   }
 }
 
+/**
+ * METAM4'te iki farklı puanlama biçimi vardır:
+ *  - PUAN veren disiplinler  : hücre "311" gibi  -> yüksek = iyi
+ *  - SIRALAMA veren disiplinler: hücre "XXXXX 5 12222" gibi -> küçük = iyi
+ * "marks" içindeki X/- deseni (jüri sıralama turları) ayrımı sağlar.
+ */
+export function isPlacementMode(rows: ResultRow[]): boolean {
+  return rows.some((r) => !!r.marks && /[X-]/.test(r.marks))
+}
+
 /** Sonuçları sıraya göre sıralar (boş sıra en sona). */
 export function sortByPlace(rows: ResultRow[]) {
   return [...rows].sort((a, b) => {

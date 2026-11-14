@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { getEventResults, sortByPlace } from "@/lib/results"
+import { getEventResults, isPlacementMode, sortByPlace } from "@/lib/results"
 import { SiteHeader } from "@/components/SiteHeader"
 
 // Sonuçlar her yayında değişir -> her istekte taze çekilir
@@ -144,6 +144,8 @@ export default async function SonuclarPage({
             if (!catResults.length) return null
 
             const judges = judgesOf(cat.id)
+            // Bu kategoride jüriler puAN mi verdi, sıralama mı?
+            const placement = isPlacementMode(catResults)
 
             return (
               <div key={cat.id} className="notch-tr overflow-hidden rounded-xl2 border border-navy/10 bg-white shadow-card">
@@ -202,7 +204,8 @@ export default async function SonuclarPage({
                                   : "—"}
                               </p>
                               <p className="display shrink-0 text-lg text-navy">
-                                Toplam {r.sum ?? "—"}
+                                {placement ? "Sıra toplamı " : "Toplam "}
+                                {r.sum ?? "—"}
                               </p>
                             </div>
                           </div>
@@ -220,8 +223,12 @@ export default async function SonuclarPage({
                         <th className="px-6 py-3">Sıra</th>
                         <th className="px-6 py-3">Performans</th>
                         <th className="px-6 py-3">Kulüp</th>
-                        <th className="px-6 py-3">Jüri Puanları</th>
-                        <th className="px-6 py-3 text-right">Toplam</th>
+                        <th className="px-6 py-3">
+                          {placement ? "Jüri Sıralaması" : "Jüri Puanları"}
+                        </th>
+                        <th className="px-6 py-3 text-right">
+                          {placement ? "Toplam (düşük = iyi)" : "Toplam"}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>

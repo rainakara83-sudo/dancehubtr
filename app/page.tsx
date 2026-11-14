@@ -3,7 +3,7 @@ import { site } from "../content/site"
 import BeklemeFormu from "@/components/BeklemeFormu"
 import { SiteHeader, Logo } from "@/components/SiteHeader"
 import { NAV } from "@/content/nav"
-import { getEventResults, sortByPlace } from "@/lib/results"
+import { getEventResults, isPlacementMode, sortByPlace } from "@/lib/results"
 
 // Ana sayfa en fazla 5 dakikada bir yenilenir (sonuçlar değişebilir)
 export const revalidate = 300
@@ -41,7 +41,10 @@ export default async function Home() {
     const judges = [...new Map(rel.map((s) => [s.label, s.full_name])).entries()].sort(
       (a, b) => a[0].localeCompare(b[0])
     )
-    return { event: selected, cat, rows, labels, marks, judges }
+    const placement = isPlacementMode(
+      results.filter((r) => r.event_category_id === cat.id)
+    )
+    return { event: selected, cat, rows, labels, marks, judges, placement }
   })()
 
   return (
@@ -332,7 +335,7 @@ export default async function Home() {
                         </th>
                       ))}
                       <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
-                        Toplam
+                        {latest.placement ? "Toplam (düşük = iyi)" : "Toplam"}
                       </th>
                     </tr>
                   </thead>

@@ -34,14 +34,20 @@ before update on public.profiles
 for each row execute function public.profiles_role_guard();
 
 -- ---- 2) Yetkili hesabı staff yap ------------------------------------------
-update public.profiles
-set role = 'staff'
-where id = 'f06db9c9-35d5-4936-b718-8906c47e9aaf'
-  and role not in ('staff', 'admin');
+-- Not: auth.users'a kayit olan her kullanici icin profil satiri otomatik
+-- olusur (handle_new_user trigger'i). Eski kayitlarda bu satir eksik
+-- olabilir; o durumda auth.users'tan alinarak olusturulur.
+insert into public.profiles (id, email, full_name, role)
+select id, email, 'Selma Kara', 'staff'
+from auth.users
+where email = 'rainakara83@gmail.com'
+on conflict (id) do update set role = 'staff';
 
 -- ---- 3) Doğrulama raporu ----------------------------------------------------
 select
-  (select count(*) from public.profiles where role = 'staff')          as staff_kullanici,
+  (select count(*) from public.profiles where role in ('staff','admin')) as staff_kullanici,
+  (select count(*) from public.profiles)                              as toplam_profil,
+  (select count(*) from auth.users)                                   as auth_kullanici,
   (select count(*) from public.performances)                          as performans,
   (select count(*) from public.performances where real_name is not null) as gercek_isimli,
   (select count(*) from public.performances where guest_number is not null) as guest_kayit,

@@ -1,6 +1,11 @@
+import Link from "next/link"
 import { site } from "../content/site"
 import BeklemeFormu from "@/components/BeklemeFormu"
 import { SiteHeader, Logo, NAV } from "@/components/SiteHeader"
+import { getEventResults, sortByPlace } from "@/lib/results"
+
+// Ana sayfa en fazla 5 dakikada bir yenilenir (sonuçlar değişebilir)
+export const revalidate = 300
 
 const STATS = [
   { value: "40+", label: "Yarışma" },
@@ -9,14 +14,35 @@ const STATS = [
   { value: "110", label: "Jüri" }
 ]
 
-// Demo sonuç tablosu — gerçek METAM4 çıktısından türetildi
-const SAMPLE_RESULTS = [
-  { place: 1, name: "Gece", club: "IS Group", marks: [3, 1, 1], sum: 5 },
-  { place: 2, name: "Guest 4", club: "Ferdi", marks: [1, 2, 2], sum: 5 },
-  { place: 3, name: "Kayıp Balık Nemo", club: "Kolezyum", marks: [2, 3, 3], sum: 8 }
-]
+export default async function Home() {
+  const { selected, categories, results, scores } = await getEventResults()
 
-export default function Home() {
+  // Ana sayfadaki önizleme: en son yayınlanan yarışmanın ilk kategorisi
+  const latest = (() => {
+    if (!selected || !categories.length) return null
+    // Sonucu olan ilk kategori (bazi kategorilerde sonuc olmayabilir)
+    const cat =
+      categories.find((c) => results.some((r) => r.event_category_id === c.id)) ??
+      categories[0]
+    const rows = sortByPlace(
+      results.filter((r) => r.event_category_id === cat.id)
+    ).slice(0, 3)
+    if (!rows.length) return null
+    const rowIds = new Set(rows.map((r) => r.id))
+    const rel = scores.filter((s) => rowIds.has(s.result_id))
+    const labels = [...new Set(rel.map((s) => s.label))].sort()
+    const marks = new Map<string, Map<string, number>>()
+    for (const r of rows) {
+      const m = new Map<string, number>()
+      for (const s of rel.filter((x) => x.result_id === r.id)) m.set(s.label, s.mark)
+      marks.set(r.id, m)
+    }
+    const judges = [...new Map(rel.map((s) => [s.label, s.full_name])).entries()].sort(
+      (a, b) => a[0].localeCompare(b[0])
+    )
+    return { event: selected, cat, rows, labels, marks, judges }
+  })()
+
   return (
     <main className="bg-paper text-ink">
       {/* ---------------- HEADER ---------------- */}
@@ -209,90 +235,126 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Sonuç tablosu — altta */}
-          <div className="mt-8 overflow-hidden rounded-xl3 border border-navy/10 bg-white shadow-card">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-navy/10 bg-navy px-6 py-5">
-              <div>
-                <p className="display text-xl text-white">IS GROUP KIŞ LİGİ · FINAL</p>
-                <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
-                  Show Dance · Solo Kadın · Junior
-                </p>
+          {/* Sonuç tablosu — gerçek veriden */}
+          {latest ? (
+            <div className="mt-8 overflow-hidden rounded-xl3 border border-navy/10 bg-white shadow-card">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-navy/10 bg-navy px-6 py-5">
+                <div>
+                  <p className="display text-xl text-white">
+                    {latest.event.title} · {latest.cat.title || latest.cat.name}
+                  </p>
+                  <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
+                    {latest.event.subtitle} · {latest.cat.discipline}
+                  </p>
+                </div>
+                <Link
+                  href="/sonuclar"
+                  className="rounded-full bg-sun px-4 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-navy transition hover:bg-sun-dark"
+                >
+                  Tüm sonuçlar
+                </Link>
               </div>
-              <span className="rounded-full bg-sun px-4 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-navy">
-                Yayında
-              </span>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[42rem] border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-navy/10 bg-cream">
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
-                      Sıra
-                    </th>
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
-                      Performans
-                    </th>
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
-                      Kulüp
-                    </th>
-                    {["A", "B", "C"].map((j) => (
-                      <th
-                        key={j}
-                        className="px-4 py-4 text-center text-xs font-bold uppercase tracking-[0.16em] text-navy/60"
-                      >
-                        {j}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[42rem] border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-navy/10 bg-cream">
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
+                        Sıra
                       </th>
-                    ))}
-                    <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
-                      Toplam
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {SAMPLE_RESULTS.map((r) => (
-                    <tr key={r.place} className="border-b border-navy/5 last:border-0 hover:bg-cream/60">
-                      <td className="px-6 py-5">
-                        <span
-                          className={`display grid h-10 w-10 place-items-center rounded-lg text-lg ${
-                            r.place === 1
-                              ? "bg-sun text-navy"
-                              : r.place === 2
-                                ? "bg-navy/10 text-navy"
-                                : "bg-orange/20 text-orange-dark"
-                          }`}
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
+                        Performans
+                      </th>
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
+                        Kulüp
+                      </th>
+                      {latest.labels.map((j) => (
+                        <th
+                          key={j}
+                          className="px-4 py-4 text-center text-xs font-bold uppercase tracking-[0.16em] text-navy/60"
                         >
-                          {r.place}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <p className="display text-lg text-navy">{r.name}</p>
-                      </td>
-                      <td className="px-6 py-5 text-sm font-semibold text-navy/60">{r.club}</td>
-                      {r.marks.map((m, i) => (
-                        <td key={i} className="px-4 py-5 text-center">
+                          {j}
+                        </th>
+                      ))}
+                      <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.16em] text-navy/60">
+                        Toplam
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {latest.rows.map((r) => (
+                      <tr
+                        key={r.id}
+                        className="border-b border-navy/5 last:border-0 hover:bg-cream/60"
+                      >
+                        <td className="px-6 py-5">
                           <span
-                            className={`inline-grid h-9 w-9 place-items-center rounded-lg text-sm font-bold ${
-                              m === 1 ? "bg-orange text-white" : "bg-navy/10 text-navy/70"
+                            className={`display grid h-10 w-10 place-items-center rounded-lg text-lg ${
+                              r.place === 1
+                                ? "bg-sun text-navy"
+                                : r.place === 2
+                                  ? "bg-navy/10 text-navy"
+                                  : "bg-orange/20 text-orange-dark"
                             }`}
                           >
-                            {m}
+                            {r.place ?? "—"}
                           </span>
                         </td>
-                      ))}
-                      <td className="px-6 py-5 text-right">
-                        <span className="display text-2xl text-navy">{r.sum}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        <td className="px-6 py-5">
+                          <p className="display text-lg text-navy">{r.display_name}</p>
+                          {r.choreography_title && (
+                            <p className="mt-0.5 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-orange">
+                              Koreografi adı
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-5 text-sm font-semibold text-navy/60">
+                          {r.club_name ?? "—"}
+                        </td>
+                        {latest.labels.map((label) => {
+                          const m = latest.marks.get(r.id)?.get(label)
+                          return (
+                            <td key={label} className="px-4 py-5 text-center">
+                              <span
+                                className={`inline-grid h-9 w-9 place-items-center rounded-lg text-sm font-bold ${
+                                  m === 1
+                                    ? "bg-orange text-white"
+                                    : "bg-navy/10 text-navy/70"
+                                }`}
+                              >
+                                {m ?? "—"}
+                              </span>
+                            </td>
+                          )
+                        })}
+                        <td className="px-6 py-5 text-right">
+                          <span className="display text-2xl text-navy">{r.sum ?? "—"}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            <div className="border-t border-navy/10 bg-cream px-6 py-4 text-xs text-muted">
-              Jüri: GIZEM CEBI TOHMA (A) · SELCAN CARKER (B) · OLESIA DENIZ (C) — Başkan: AHMET FEVZI KAZAN
+              <div className="border-t border-navy/10 bg-cream px-6 py-4 text-xs text-muted">
+                Jüri:{" "}
+                {latest.judges.length
+                  ? latest.judges.map(([label, full]) => `${full} (${label})`).join(" · ")
+                  : "—"}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-8 rounded-xl3 border border-navy/10 bg-white p-8 text-center shadow-card">
+              <p className="display text-xl text-navy">Henüz yayınlanmış sonuç yok</p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted">
+                Yarışma bittiğinde masa hakemi sonuçları yükler; sonuçlar burada ve
+                <Link href="/sonuclar" className="ml-1 font-semibold text-orange">
+                  /sonuclar
+                </Link>{" "}
+                sayfasında yayınlanır.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

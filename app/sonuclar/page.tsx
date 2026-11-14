@@ -1,50 +1,9 @@
 import Link from "next/link"
-import { getSupabasePublic } from "@/lib/supabase"
+import { getEventResults, sortByPlace } from "@/lib/results"
 import { SiteHeader } from "@/components/SiteHeader"
 
 // Sonuçlar her yayında değişir -> her istekte taze çekilir
 export const dynamic = "force-dynamic"
-
-type EventRow = {
-  id: string
-  slug: string
-  title: string
-  subtitle: string | null
-  city: string | null
-  start_date: string
-}
-
-type CategoryRow = {
-  id: string
-  event_id: string
-  name: string
-  title: string | null
-  discipline: string | null
-  display_order: number
-}
-
-type ResultRow = {
-  id: string
-  performance_id: string
-  round: string
-  place: number | null
-  place_label: string | null
-  sum: number | null
-  marks: string | null
-  display_name: string
-  choreography_title: string | null
-  guest_number: number | null
-  bib_number: number | null
-  club_name: string | null
-  event_category_id: string
-}
-
-type ScoreRow = {
-  result_id: string
-  label: string
-  full_name: string
-  mark: number
-}
 
 function trDate(iso: string) {
   try {
@@ -65,7 +24,9 @@ export default async function SonuclarPage({
   searchParams: Promise<{ e?: string }>
 }) {
   const { e: wanted } = await searchParams
-  const supabase = getSupabasePublic()
+
+  const { events, selected, categories, results, scores, resultCount } =
+    await getEventResults(wanted)
 
   const empty = (
     <main className="min-h-screen bg-paper text-ink">
@@ -80,69 +41,9 @@ export default async function SonuclarPage({
     </main>
   )
 
-  if (!supabase) return empty
+  if (!selected) return empty
 
-  // 1) Yayınlanmış etkinlikler
-  const { data: eventData } = await supabase
-    .from("events")
-    .select("id, slug, title, subtitle, city, start_date")
-    .eq("status", "published")
-    .order("start_date", { ascending: false })
-
-  const events = (eventData ?? []) as EventRow[]
-  if (!events.length) return empty
-
-  // 2) Kategoriler
-  const { data: catData } = await supabase
-    .from("event_categories")
-    .select("id, event_id, name, title, discipline, display_order")
-    .in(
-      "event_id",
-      events.map((e) => e.id)
-    )
-
-  const categories = (catData ?? []) as CategoryRow[]
-  const catIds = categories.map((c) => c.id)
-
-  // 3) Sonuçlar + jüri puanları (public view'lar -> gerçek isimler dışarı çıkmaz)
-  let results: ResultRow[] = []
-  let scores: ScoreRow[] = []
-  if (catIds.length) {
-    const [res, sc] = await Promise.all([
-      supabase
-        .from("public_results")
-        .select(
-          "id, performance_id, round, place, place_label, sum, marks, display_name, choreography_title, guest_number, bib_number, club_name, event_category_id"
-        )
-        .in("event_category_id", catIds),
-      supabase
-        .from("public_judge_scores")
-        .select("result_id, label, full_name, mark")
-        .in("event_category_id", catIds)
-    ])
-    results = (res.data ?? []) as ResultRow[]
-    scores = (sc.data ?? []) as ScoreRow[]
-  }
-
-  const resultCountByEvent = new Map<string, number>()
-  for (const r of results) {
-    const cat = categories.find((c) => c.id === r.event_category_id)
-    if (!cat) continue
-    resultCountByEvent.set(cat.event_id, (resultCountByEvent.get(cat.event_id) ?? 0) + 1)
-  }
-
-  // Sonucu olan etkinlikler
-  const eventsWithResults = events.filter((e) => (resultCountByEvent.get(e.id) ?? 0) > 0)
-  if (!eventsWithResults.length) return empty
-
-  const selected =
-    eventsWithResults.find((e) => e.slug === wanted) ?? eventsWithResults[0]
-
-  const selCategories = categories
-    .filter((c) => c.event_id === selected.id)
-    .sort((a, b) => a.display_order - b.display_order)
-
-  const scoresByResult = new Map<string, ScoreRow[]>()
+  const scoresByResult = new Map<string, typeof scores>()
   for (const s of scores) {
     const list = scoresByResult.get(s.result_id) ?? []
     list.push(s)
@@ -150,11 +51,14 @@ export default async function SonuclarPage({
   }
 
   const judgesOf = (catId: string) => {
+    const catResultIds = new Set(
+      results.filter((r) => r.event_category_id === catId).map((r) => r.id)
+    )
     const names = new Map<string, string>()
     for (const s of scores) {
+      if (!catResultIds.has(s.result_id)) continue
       if (s.label && !names.has(s.label)) names.set(s.label, s.full_name)
     }
-    void catId
     return [...names.entries()].sort((a, b) => a[0].localeCompare(b[0]))
   }
 
@@ -183,13 +87,13 @@ export default async function SonuclarPage({
       </section>
 
       {/* ---------------- ETKİNLİK SEÇİCİ ---------------- */}
-      {eventsWithResults.length > 1 && (
+      {events.length > 1 && (
         <div className="border-b border-navy/10 bg-cream">
           <div className="shell flex flex-wrap items-center gap-3 py-5">
             <span className="text-xs font-bold uppercase tracking-[0.15em] text-navy/50">
               Yarışma
             </span>
-            {eventsWithResults.map((e) => (
+            {events.map((e) => (
               <Link
                 key={e.id}
                 href={`/sonuclar?e=${e.slug}`}
@@ -213,26 +117,29 @@ export default async function SonuclarPage({
           <div>
             <h2 className="display text-3xl text-navy">{selected.title}</h2>
             <p className="mt-1 text-sm text-navy/60">
-              {[selected.subtitle, selected.city].filter(Boolean).join(" · ")}
+              {(() => {
+                const sub = (selected.subtitle ?? "").trim()
+                const city = (selected.city ?? "").trim()
+                if (!sub) return city
+                if (!city) return sub
+                const norm = (t: string) =>
+                  t.toLocaleLowerCase("tr-TR").replace(/[^a-z0-9]/g, "")
+                return norm(sub).includes(norm(city)) ? sub : `${sub} · ${city}`
+              })()}
             </p>
           </div>
           <p className="text-sm font-semibold text-navy/60">
-            {resultCountByEvent.get(selected.id) ?? 0} performans ·{" "}
-            {selCategories.length} kategori
+            {resultCount} performans ·{" "}
+            {categories.length} kategori
           </p>
         </div>
 
         {/* ---------------- KATEGORİLER ---------------- */}
         <div className="mt-10 space-y-10">
-          {selCategories.map((cat) => {
-            const catResults = results
-              .filter((r) => r.event_category_id === cat.id)
-              .sort((a, b) => {
-                const pa = a.place ?? Number.MAX_SAFE_INTEGER
-                const pb = b.place ?? Number.MAX_SAFE_INTEGER
-                if (pa !== pb) return pa - pb
-                return (a.bib_number ?? 0) - (b.bib_number ?? 0)
-              })
+          {categories.map((cat) => {
+            const catResults = sortByPlace(
+              results.filter((r) => r.event_category_id === cat.id)
+            )
 
             if (!catResults.length) return null
 
